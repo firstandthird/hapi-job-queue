@@ -1,0 +1,13 @@
+aliases:
+  - 'jshint:scripts'
+jshint:
+  - 'lib/**/*.js'
+  - 'test/**/*.js'
+  - 'index.js'
+watch:
+  files:
+    - 'lib/**/*.js'
+    - 'test/**/*.js'
+    - 'index.js'
+  tasks:
+    - 'scripts'

@@ -1,0 +1,44 @@
+{
+  "name": "hapi-job-queue",
+  "version": "0.0.0",
+  "description": "A hapi and mongodb powered job queue",
+  "main": "index.js",
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dawnerd/hapi-job-queue.git"
+  },
+  "keywords": [
+    "hapi",
+    "job",
+    "queue",
+    "mongodb",
+    "scheduled",
+    "tasks"
+  ],
+  "author": "Troy Whiteley",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dawnerd/hapi-job-queue/issues"
+  },
+  "homepage": "https://github.com/dawnerd/hapi-job-queue",
+  "dependencies": {
+    "async": "0.9.0",
+    "boom": "2.6.1",
+    "hoek": "2.12.0",
+    "mongodb": "2.0.25"
+  },
+  "devDependencies": {
+    "code": "^1.4.0",
+    "grunt": "0.4.5",
+    "grunt-concurrent": "1.0.0",
+    "grunt-contrib-jshint": "0.11.1",
+    "grunt-contrib-watch": "0.6.1",
+    "grunt-shell": "1.1.2",
+    "hapi": "8.4.0",
+    "lab": "5.5.1",
+    "load-grunt-config": "0.16.0"
+  }
+}

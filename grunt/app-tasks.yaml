@@ -1,0 +1,17 @@
+aliases:
+  - 'jshint:app'
+jshint:
+  - 'lib/**/*.js'
+  - 'test/*.js'
+  - 'index.js'
+shell:
+  command: './node_modules/.bin/lab -l -C test/*.test.js'
+  options:
+    stdout: true
+    stderr: true
+    color: true
+watch:
+  files:
+    - '<%= jshint.app %>'
+  tasks:
+    - 'app'
