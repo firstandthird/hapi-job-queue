@@ -21,15 +21,21 @@ describe('job queue', function() {
     server.register([
       { register: require('../'), options: {
         connectionUrl: 'mongodb://localhost:27017/hapi-job-queue-test',
-        jobs: {
-          'test-job': {
+        jobs: [
+          {
+            name: 'test-job',
             enabled: false,
-            method: function(cb) {
+            method: function(data, cb) {
               output = 'ran';
               cb();
-            }
+            },
+            tasks: [
+              {
+                something: 'some data'
+              }
+            ]
           }
-        }
+        ]
       } }
     ], function() {
       plugin = server.plugins.jobs;
@@ -48,20 +54,24 @@ describe('job queue', function() {
       done();
     });
 
-    it.skip('should initialize jobs', function(done) {
-      plugin.collection.find({name: 'test-job'}, function(err, jobs) {
+    it('should expose settings object', function(done) {
+      expect(plugin.settings).to.exist();
+      done();
+    });
+
+    it('should initialize jobs', function(done) {
+      plugin.collection.find({name: 'test-job'}).toArray(function(err, jobs) {
         expect(jobs.length).to.equal(1);
 
         var job = jobs[0];
 
         expect(job.name).to.equal('test-job');
-        expect(job.nextRun).to.equal(+new Date());
+        // expect(job.nextRun).to.equal(+new Date());
         expect(job.locked).to.equal(false);
-        expect(job.enabled).to.equal(false);
         expect(job.lastRun).to.equal(undefined);
         expect(job.timeToRun).to.equal(undefined);
-        expect(job.group).to.equal('test-job');
-
+        expect(job.group).to.deep.equal(['test-job']);
+        expect(job.tasks).to.deep.equal([{something: 'some data'}]);
         done();
       });
     });
@@ -91,6 +101,7 @@ describe('job queue', function() {
           expect(job.lastRun).to.equal(undefined);
           expect(job.timeToRun).to.equal(undefined);
           expect(job.group).to.equal('group1');
+          expect(job.status).to.equal('pending');
 
           done();
         });
