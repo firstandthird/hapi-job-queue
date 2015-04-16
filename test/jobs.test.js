@@ -235,21 +235,14 @@ describe('job queue', function() {
       });
     });
 
-    it.skip('should re-schedule a job', function(done) {
-      done();
-    });
+    it('should re-schedule a job', function(done) {
+      plugin.reschedule('test-job', { schedule: 'in 30 seconds' }, function(err) {
+        expect(err).to.not.exist();
 
-    it.skip('should run a job right away', function(done) {
-      done();
-    });
+        expect(plugin.jobs['test-job'].schedule).to.equal('in 30 seconds');
 
-    // This one is to batch tasks together. Still figuring out how to handle it.
-    it.skip('should queue up instances of a job', function(done) {
-      done();
-    });
-
-    it.skip('should run a group of jobs right away', function(done) {
-      done();
+        done();
+      });
     });
   });
 
@@ -295,6 +288,19 @@ describe('job queue', function() {
     });
 
     it.skip('should pass parameters to job method', function(done) {
+      done();
+    });
+
+    it.skip('should run a job right away', function(done) {
+      done();
+    });
+
+    // This one is to batch tasks together. Still figuring out how to handle it.
+    it.skip('should queue up instances of a job', function(done) {
+      done();
+    });
+
+    it.skip('should run a group of jobs right away', function(done) {
       done();
     });
   });
