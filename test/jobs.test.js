@@ -20,6 +20,7 @@ var output = null;
 before(function(done) {
   server = new Hapi.Server();
   server.connection({port: 3000});
+  output = null;
 
   MongoClient.connect(mongoUrl, function(err, db) {
     if (err) {
@@ -35,14 +36,17 @@ before(function(done) {
             {
               name: 'test-job',
               enabled: false,
-              schedule: 'every 5 seconds',
+              schedule: 'every 1 second',
               method: function(data, cb) {
-                output = 'ran';
+                output = data.time;
                 cb();
               },
               tasks: [
                 {
-                  something: 'some data'
+                  time: 1
+                },
+                {
+                  time: 2
                 }
               ]
             }
@@ -88,7 +92,7 @@ describe('job queue', function() {
         expect(job.lastRun).to.equal(undefined);
         expect(job.timeToRun).to.equal(undefined);
         expect(job.group).to.deep.equal(['test-job']);
-        expect(job.tasks).to.deep.equal([{something: 'some data'}]);
+        expect(job.tasks).to.deep.equal([{time: 1}, {time: 2}]);
         expect(job.enabled).to.equal(false);
         expect(job.nextRun).to.exist();
 
@@ -106,7 +110,7 @@ describe('job queue', function() {
         cron: '* 15 10 ? * *',
         cronSeconds: true,
         method: function(cb) {
-          output = 'ran2';
+          output = 2;
           cb();
         }
       }, function(err) {
@@ -247,8 +251,13 @@ describe('job queue', function() {
   });
 
   describe('runner', function() {
-    it.skip('should run a job at the specified time', function(done) {
-      done();
+    it('should run a job at the specified time', function(done) {
+      plugin.enable('test-job', function(err) {
+        setTimeout(function() {
+          expect(output).to.equal(2);
+          done();
+        }, 1100);
+      });
     });
 
     it.skip('should run a group of jobs at the specified time', function(done) {
