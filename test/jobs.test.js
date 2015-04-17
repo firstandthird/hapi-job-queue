@@ -35,11 +35,12 @@ before(function(done) {
           jobs: [
             {
               name: 'test-job',
-              enabled: false,
-              schedule: 'every 1 second',
+              enabled: true,
+              schedule: 'every 1 seconds',
               method: function(data, cb) {
                 output = data.time;
-                cb();
+
+                setTimeout(cb, 100);
               },
               tasks: [
                 {
@@ -61,7 +62,7 @@ before(function(done) {
   });
 });
 
-describe('job queue', function() {
+describe('job queue', { timeout: 5000 }, function() {
 
   describe('setup', function() {
     it('should expose db connection', function(done) {
@@ -93,7 +94,7 @@ describe('job queue', function() {
         expect(job.timeToRun).to.equal(undefined);
         expect(job.group).to.deep.equal(['test-job']);
         expect(job.tasks).to.deep.equal([{time: 1}, {time: 2}]);
-        expect(job.enabled).to.equal(false);
+        expect(job.enabled).to.equal(true);
         expect(job.nextRun).to.exist();
 
         done();
@@ -161,29 +162,6 @@ describe('job queue', function() {
       done();
     });
 
-    it('should check if a job is valid before enabling', function(done) {
-      plugin.enable('fake-job', function(err) {
-        expect(err).to.deep.equal(new Error('Job doesn\'t exist'));
-        done();
-      });
-    });
-
-    it('should enable a job', function(done) {
-      plugin.enable('test-job', function(err) {
-        expect(err).to.not.exist();
-
-        plugin.collection.find({name: 'test-job'}).toArray(function(err, jobs) {
-
-          expect(err).to.not.exist();
-          expect(jobs.length).to.equal(1);
-
-          expect(jobs[0].enabled).to.equal(true);
-
-          done();
-        });
-      });
-    });
-
     it('should check if a job is valid before disabling', function(done) {
       plugin.disable('fake-job', function(err) {
         expect(err).to.deep.equal(new Error('Job doesn\'t exist'));
@@ -201,6 +179,29 @@ describe('job queue', function() {
           expect(jobs.length).to.equal(1);
 
           expect(jobs[0].enabled).to.equal(false);
+
+          done();
+        });
+      });
+    });
+
+    it('should check if a job is valid before enabling', function(done) {
+      plugin.enable('fake-job', function(err) {
+        expect(err).to.deep.equal(new Error('Job doesn\'t exist'));
+        done();
+      });
+    });
+
+    it('should enable a job', function(done) {
+      plugin.enable('test-job', function(err) {
+        expect(err).to.not.exist();
+
+        plugin.collection.find({name: 'test-job'}).toArray(function(err, jobs) {
+
+          expect(err).to.not.exist();
+          expect(jobs.length).to.equal(1);
+
+          expect(jobs[0].enabled).to.equal(true);
 
           done();
         });
@@ -240,10 +241,10 @@ describe('job queue', function() {
     });
 
     it('should re-schedule a job', function(done) {
-      plugin.reschedule('test-job', { schedule: 'in 30 seconds' }, function(err) {
+      plugin.reschedule('test-job', { schedule: 'every 30 seconds' }, function(err) {
         expect(err).to.not.exist();
 
-        expect(plugin.jobs['test-job'].schedule).to.equal('in 30 seconds');
+        expect(plugin.jobs['test-job'].schedule).to.equal('every 30 seconds');
 
         done();
       });
@@ -252,11 +253,18 @@ describe('job queue', function() {
 
   describe('runner', function() {
     it('should run a job at the specified time', function(done) {
+      output = null;
       plugin.enable('test-job', function(err) {
-        setTimeout(function() {
-          expect(output).to.equal(2);
-          done();
-        }, 1100);
+        plugin.reschedule('test-job', { schedule: 'every 1 seconds' }, function(err) {
+          expect(err).to.not.exist();
+
+          setTimeout(function() {
+            expect(err).to.not.exist();
+
+            expect(output).to.equal(2);
+            done();
+          }, 1400);
+        });
       });
     });
 
@@ -264,16 +272,40 @@ describe('job queue', function() {
       done();
     });
 
-    it.skip('should lock a running job', function(done) {
-      done();
+    it('should lock a running job', function(done) {
+      output = null;
+      plugin.reschedule('test-job', { schedule: 'every 1 seconds' }, function(err) {
+        expect(err).to.not.exist();
+
+        setTimeout(function() {
+          plugin.collection.find({group: 'test-job'}).toArray(function(err, jobs) {
+            expect(err).to.not.exist();
+
+            expect(jobs[0].locked).to.equal(true);
+            done();
+          });
+        }, 1050);
+      });
     });
 
     it.skip('should lock grouped jobs', function(done) {
       done();
     });
 
-    it.skip('should unlock a job when it finishes', function(done) {
-      done();
+    it('should unlock a job when it finishes', function(done) {
+      output = null;
+      plugin.reschedule('test-job', { schedule: 'every 1 seconds' }, function(err) {
+        expect(err).to.not.exist();
+
+        setTimeout(function() {
+          plugin.collection.find({group: 'test-job'}).toArray(function(err, jobs) {
+            expect(err).to.not.exist();
+
+            expect(jobs[0].locked).to.equal(false);
+            done();
+          });
+        }, 1400);
+      });
     });
 
     it.skip('should unlock grouped jobs when it finishes', function(done) {
