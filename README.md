@@ -1,6 +1,8 @@
 # hapi-job-queue
 Hapi and MongoDB powered job queue.
 
+[![Build Status](https://travis-ci.org/dawnerd/hapi-job-queue.svg?branch=master)](https://travis-ci.org/dawnerd/hapi-job-queue)
+
 Features:
 
  - Utilizes server methods for jobs
