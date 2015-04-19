@@ -288,7 +288,8 @@ describe('job queue', { timeout: 5000 }, function() {
       });
     });
 
-    it.skip('should lock grouped jobs', function(done) {
+    it.('should lock grouped jobs', function(done) {
+      expect(false).to.equal(true);
       done();
     });
 
