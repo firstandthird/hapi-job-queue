@@ -288,7 +288,7 @@ describe('job queue', { timeout: 5000 }, function() {
       });
     });
 
-    it.('should lock grouped jobs', function(done) {
+    it('should lock grouped jobs', function(done) {
       expect(false).to.equal(true);
       done();
     });
@@ -309,7 +309,8 @@ describe('job queue', { timeout: 5000 }, function() {
       });
     });
 
-    it.skip('should unlock grouped jobs when it finishes', function(done) {
+    it('should unlock grouped jobs when it finishes', function(done) {
+      expect(false).to.equal(true);
       done();
     });
 
