@@ -4,7 +4,7 @@
   "description": "A hapi and mongodb powered job queue",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/.bin/lab -l -C test/*.test.js"
+    "test": "./node_modules/.bin/lab -r lcov -l -C test/*.test.js | ./node_modules/.bin/coveralls"
   },
   "repository": {
     "type": "git",
@@ -34,6 +34,7 @@
   },
   "devDependencies": {
     "code": "1.4.0",
+    "coveralls": "^2.11.2",
     "grunt": "0.4.5",
     "grunt-concurrent": "1.0.0",
     "grunt-contrib-jshint": "0.11.2",
