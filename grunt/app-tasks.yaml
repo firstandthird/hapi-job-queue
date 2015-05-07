@@ -5,7 +5,7 @@ jshint:
   - 'test/*.js'
   - 'index.js'
 shell:
-  command: './node_modules/.bin/lab -l -C test/*.test.js'
+  command: './node_modules/.bin/lab -l -c -C test/*.test.js'
   options:
     stdout: true
     stderr: true

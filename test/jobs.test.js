@@ -137,6 +137,24 @@ describe('job queue', { timeout: 5000 }, function() {
       });
     });
 
+    it('should add a job only once', function(done) {
+      plugin.add({
+        name: 'test-job2',
+        enabled: true,
+        group: 'group1',
+        cron: '* 15 10 ? * *',
+        cronSeconds: true,
+        method: function(cb) {
+          output = 2;
+          cb();
+        }
+      }, function(err) {
+        expect(err.toString()).to.equal('Error: Job already loaded');
+        done();
+      });
+    });
+
+
     it('should only add a job once', function(done) {
       plugin.add({
         name: 'test-job',
