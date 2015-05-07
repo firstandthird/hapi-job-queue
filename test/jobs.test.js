@@ -334,8 +334,52 @@ describe('job queue', { timeout: 5000 }, function() {
       done();
     });
 
-    it.skip('should run a job right away', function(done) {
-      done();
+    it('should run a job right away', function(done) {
+      var single = false;
+
+      plugin.add({
+        name: 'test-single',
+        enabled: true,
+        single: true,
+        method: function(data, cb) {
+          single = data;
+          cb();
+        }
+      }, function(err) {
+        expect(err).to.not.exist();
+
+        expect(single).to.equal(false);
+
+        plugin.runSingle('test-single', [true], function(err) {
+          expect(err).to.not.exist();
+          expect(single).to.equal(true);
+          done();
+        });
+      });
+    });
+
+    it('should run a job right away without data', function(done) {
+      var single = false;
+
+      plugin.add({
+        name: 'test-single2',
+        enabled: true,
+        single: true,
+        method: function(data, cb) {
+          single = true;
+          cb();
+        }
+      }, function(err) {
+        expect(err).to.not.exist();
+
+        expect(single).to.equal(false);
+
+        plugin.runSingle('test-single2', function(err) {
+          expect(err).to.not.exist();
+          expect(single).to.equal(true);
+          done();
+        });
+      });
     });
 
     // This one is to batch tasks together. Still figuring out how to handle it.
