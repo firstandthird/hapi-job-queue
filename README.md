@@ -2,6 +2,8 @@
 Hapi and MongoDB powered job queue.
 
 [![Build Status](https://travis-ci.org/dawnerd/hapi-job-queue.svg?branch=master)](https://travis-ci.org/dawnerd/hapi-job-queue)
+[![Coverage Status](https://coveralls.io/repos/dawnerd/hapi-job-queue/badge.svg?branch=master)](https://coveralls.io/r/dawnerd/hapi-job-queue?branch=master)
+
 
 Features:
 
