@@ -54,6 +54,11 @@ before(function(done) {
           ]
         } }
       ], function() {
+        server.method('testMethod', function(data, cb) {
+          output = 'methodized';
+          setTimeout(cb, 50);
+        });
+
         plugin = server.plugins.jobs;
         done();
       });
@@ -286,10 +291,6 @@ describe('job queue', { timeout: 5000 }, function() {
       });
     });
 
-    it.skip('should run a group of jobs at the specified time', function(done) {
-      done();
-    });
-
     it('should lock a running job', function(done) {
       output = null;
       plugin.reschedule('test-job', { schedule: 'every 1 seconds' }, function(err) {
@@ -304,11 +305,6 @@ describe('job queue', { timeout: 5000 }, function() {
           });
         }, 1050);
       });
-    });
-
-    it('should lock grouped jobs', function(done) {
-      expect(false).to.equal(true);
-      done();
     });
 
     it('should unlock a job when it finishes', function(done) {
@@ -327,29 +323,13 @@ describe('job queue', { timeout: 5000 }, function() {
       });
     });
 
-    it('should unlock grouped jobs when it finishes', function(done) {
-      expect(false).to.equal(true);
-      done();
-    });
+    it('should time how long a job takes to process', function(done) {
+      plugin.collection.find({group: 'test-job'}).toArray(function(err, jobs) {
+        expect(err).to.not.exist();
 
-    it.skip('should time how long a job takes to process', function(done) {
-      done();
-    });
-
-    it.skip('should handle a failed job', function(done) {
-      done();
-    });
-
-    it.skip('should run a job method by name', function(done) {
-      done();
-    });
-
-    it.skip('should run a job method by function', function(done) {
-      done();
-    });
-
-    it.skip('should pass parameters to job method', function(done) {
-      done();
+        expect(jobs[0].timeToRun).to.be.above(0);
+        done();
+      });
     });
 
     it('should run a job right away', function(done) {
@@ -368,9 +348,29 @@ describe('job queue', { timeout: 5000 }, function() {
 
         expect(single).to.equal(false);
 
-        plugin.runSingle('test-single', [true], function(err) {
+        plugin.runSingle('test-single', [true], function(err, jobError) {
           expect(err).to.not.exist();
+          expect(jobError).to.not.exist();
           expect(single).to.equal(true);
+          done();
+        });
+      });
+    });
+
+    it('should handle a failed job', function(done) {
+      plugin.add({
+        name: 'test-fail',
+        enabled: true,
+        single: true,
+        method: function(data, cb) {
+          cb(new Error('Test error'));
+        }
+      }, function(err) {
+        expect(err).to.not.exist();
+
+        plugin.runSingle('test-fail', [true], function(err, jobError) {
+          expect(err).to.not.exist();
+          expect(jobError.toString()).to.equal('Error: Test error');
           done();
         });
       });
@@ -392,19 +392,36 @@ describe('job queue', { timeout: 5000 }, function() {
 
         expect(single).to.equal(false);
 
-        plugin.runSingle('test-single2', function(err) {
+        plugin.runSingle('test-single2', function(err, jobError) {
           expect(err).to.not.exist();
+          expect(jobError).to.not.exist();
           expect(single).to.equal(true);
           done();
         });
       });
     });
 
-    // This one is to batch tasks together. Still figuring out how to handle it.
-    it.skip('should queue up instances of a job', function(done) {
-      done();
+    it.skip('should run a job method by name', function(done) {
+      plugin.add({
+        name: 'test-method',
+        enabled: true,
+        single: true,
+        method: 'testMethod'
+      }, function(err) {
+        expect(err).to.not.exist();
+
+        expect(output).to.equal(null);
+
+        plugin.runSingle('test-method', function(err, jobError) {
+          expect(err).to.not.exist();
+          expect(jobError).to.not.exist();
+          expect(output).to.equal('methodized');
+          done();
+        });
+      });
     });
 
+    //TODO: Still thinking about groups - Not sure if they're needed
     it.skip('should run a group of jobs right away', function(done) {
       done();
     });
