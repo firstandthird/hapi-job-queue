@@ -4,6 +4,7 @@ var Code = require('code');
 var Lab = require('lab');
 var lab = exports.lab = Lab.script();
 var Hapi = require('hapi');
+var Joi = require('joi');
 
 var describe = lab.describe;
 var it = lab.it;
@@ -32,6 +33,7 @@ before(function(done) {
       server.register([
         { register: require('../'), options: {
           connectionUrl: mongoUrl,
+          endpoint: '/',
           jobs: [
             {
               name: 'test-job',
@@ -401,7 +403,9 @@ describe('job queue', { timeout: 5000 }, function() {
       });
     });
 
-    it.skip('should run a job method by name', function(done) {
+    it('should run a job method by name', function(done) {
+      output = null;
+      
       plugin.add({
         name: 'test-method',
         enabled: true,
@@ -428,12 +432,42 @@ describe('job queue', { timeout: 5000 }, function() {
   });
 
   describe('api', function() {
-    it.skip('should expose an api endpoint', function(done) {
-      done();
-    });
 
-    it.skip('should return all jobs', function(done) {
-      done();
+    it('should return all jobs', function(done) {
+      server.inject({
+        method: 'get',
+        url: '/'
+      }, function(response) {
+        Joi.validate(response, {
+          raw: Joi.any(),
+          headers: Joi.any(),
+          rawPayload: Joi.any(),
+          payload: Joi.any(),
+          request: Joi.any(),
+          statusCode: Joi.allow(200),
+          result: Joi.array().items(
+            Joi.object().keys({
+              _id: Joi.any(),
+              name: Joi.string(),
+              tasks: Joi.array().allow(null),
+              group: Joi.array(),
+              locked: Joi.boolean(),
+              enabled: Joi.boolean(),
+              nextRun: Joi.date().allow(null),
+              lastRun: Joi.date(),
+              single: Joi.boolean(),
+              timeToRun: Joi.number()
+            })
+          )
+        }, function(err, res) {
+          if (err) {
+            console.log(err);
+          }
+
+          expect(err).to.not.exist();
+          done();
+        });
+      });
     });
 
     it.skip('should enable a job', function(done) {
