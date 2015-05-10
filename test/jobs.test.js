@@ -22,6 +22,7 @@ before(function(done) {
   server = new Hapi.Server();
   server.connection({port: 3000});
   output = null;
+  single = false;
 
   MongoClient.connect(mongoUrl, function(err, db) {
     if (err) {
@@ -335,7 +336,7 @@ describe('job queue', { timeout: 5000 }, function() {
     });
 
     it('should run a job right away', function(done) {
-      var single = false;
+      single = false;
 
       plugin.add({
         name: 'test-single',
@@ -405,7 +406,7 @@ describe('job queue', { timeout: 5000 }, function() {
 
     it('should run a job method by name', function(done) {
       output = null;
-      
+
       plugin.add({
         name: 'test-method',
         enabled: true,
@@ -470,20 +471,67 @@ describe('job queue', { timeout: 5000 }, function() {
       });
     });
 
-    it.skip('should enable a job', function(done) {
-      done();
+    it('should enable a job', function(done) {
+      plugin.disable('test-job', function(err) {
+        expect(err).to.not.exist();
+
+        server.inject({
+          method: 'get',
+          url: '/enable/test-job'
+        }, function(response) {
+          expect(response.statusCode).to.equal(200);
+          expect(response.result).to.deep.equal({ success: true});
+
+          plugin.collection.find({name: 'test-job'}).toArray(function(err, jobs) {
+
+            expect(err).to.not.exist();
+            expect(jobs.length).to.equal(1);
+
+            expect(jobs[0].enabled).to.equal(true);
+
+            done();
+          });
+        });
+      });
     });
 
-    it.skip('should disable a job', function(done) {
-      done();
+    it('should disable a job', function(done) {
+      plugin.enable('test-job', function(err) {
+        expect(err).to.not.exist();
+
+        server.inject({
+          method: 'get',
+          url: '/disable/test-job'
+        }, function(response) {
+          expect(response.statusCode).to.equal(200);
+          expect(response.result).to.deep.equal({ success: true});
+
+          plugin.collection.find({group: 'test-job'}).toArray(function(err, jobs) {
+
+            expect(err).to.not.exist();
+            expect(jobs.length).to.equal(1);
+
+            expect(jobs[0].enabled).to.equal(false);
+
+            done();
+          });
+        });
+      });
     });
 
-    it.skip('should run a job', function(done) {
-      done();
-    });
+    it('should run a job', function(done) {
+      single = false;
 
-    it.skip('should return stats', function(done) {
-      done();
+      server.inject({
+        method: 'post',
+        url: '/run/test-single',
+        payload: [true]
+      }, function(response) {
+        expect(response.statusCode).to.equal(200);
+        expect(response.result).to.deep.equal({ success: true});
+        expect(single).to.equal(true);
+        done();
+      });
     });
   });
 
