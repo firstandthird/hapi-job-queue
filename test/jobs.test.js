@@ -24,6 +24,20 @@ before(function(done) {
   output = null;
   single = false;
 
+  server.register(require('hapi-auth-bearer-token'), function (err) {
+    server.auth.strategy('simple', 'bearer-access-token', {
+      allowQueryToken: true,
+      accessTokenName: 'token',
+      validateFunc: function( token, callback ) {
+        if(token === "1234"){
+          callback(null, true, { token: token });
+        } else {
+          callback(null, false, { token: token });
+        }
+      }
+    });
+  });
+
   MongoClient.connect(mongoUrl, function(err, db) {
     if (err) {
       return next(err);
@@ -35,6 +49,7 @@ before(function(done) {
         { register: require('../'), options: {
           connectionUrl: mongoUrl,
           endpoint: '/',
+          auth: 'simple',
           jobs: [
             {
               name: 'test-job',
@@ -437,7 +452,7 @@ describe('job queue', { timeout: 5000 }, function() {
     it('should return all jobs', function(done) {
       server.inject({
         method: 'get',
-        url: '/'
+        url: '/?token=1234'
       }, function(response) {
         Joi.validate(response, {
           raw: Joi.any(),
@@ -477,7 +492,7 @@ describe('job queue', { timeout: 5000 }, function() {
 
         server.inject({
           method: 'get',
-          url: '/enable/test-job'
+          url: '/enable/test-job?token=1234'
         }, function(response) {
           expect(response.statusCode).to.equal(200);
           expect(response.result).to.deep.equal({ success: true});
@@ -501,7 +516,7 @@ describe('job queue', { timeout: 5000 }, function() {
 
         server.inject({
           method: 'get',
-          url: '/disable/test-job'
+          url: '/disable/test-job?token=1234'
         }, function(response) {
           expect(response.statusCode).to.equal(200);
           expect(response.result).to.deep.equal({ success: true});
@@ -524,12 +539,22 @@ describe('job queue', { timeout: 5000 }, function() {
 
       server.inject({
         method: 'post',
-        url: '/run/test-single',
+        url: '/run/test-single?token=1234',
         payload: [true]
       }, function(response) {
         expect(response.statusCode).to.equal(200);
         expect(response.result).to.deep.equal({ success: true});
         expect(single).to.equal(true);
+        done();
+      });
+    });
+
+    it('should use auth setting', function(done) {
+      server.inject({
+        method: 'get',
+        url: '/'
+      }, function(response) {
+        expect(response.statusCode).to.equal(401);
         done();
       });
     });
