@@ -85,3 +85,12 @@ These methods can be found in `server.plugins.jobs`.
  - `enableJob` - params: `jobName`, `callback(err)` - Enables a job.
  - `disableJob` - params: `jobName`, `callback(err)` - Disables a job.
  - `runSingle` - params: `jobName`, `tasks`, `callback(err)` - Runs a single job. Tasks uses the same task format in options.
+
+#### API
+
+If you enable the web api these endpoints will be exposed.
+
+ - `GET /` - Returns all jobs.
+ - `GET /enable/{jobName}` - Enables a job
+ - `GET /disable/{jobName}` - Disables a job
+ - `POST /run/{jobName}` - Runs a job. Accepts a json payload of task data.
