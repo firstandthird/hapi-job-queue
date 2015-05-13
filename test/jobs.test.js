@@ -48,7 +48,7 @@ before(function(done) {
       server.register([
         { register: require('../'), options: {
           connectionUrl: mongoUrl,
-          endpoint: '/',
+          endpoint: '/jobs',
           auth: 'simple',
           jobs: [
             {
@@ -452,7 +452,7 @@ describe('job queue', { timeout: 5000 }, function() {
     it('should return all jobs', function(done) {
       server.inject({
         method: 'get',
-        url: '/?token=1234'
+        url: '/jobs/?token=1234'
       }, function(response) {
         Joi.validate(response, {
           raw: Joi.any(),
@@ -492,7 +492,7 @@ describe('job queue', { timeout: 5000 }, function() {
 
         server.inject({
           method: 'get',
-          url: '/enable/test-job?token=1234'
+          url: '/jobs/enable/test-job?token=1234'
         }, function(response) {
           expect(response.statusCode).to.equal(200);
           expect(response.result).to.deep.equal({ success: true});
@@ -516,7 +516,7 @@ describe('job queue', { timeout: 5000 }, function() {
 
         server.inject({
           method: 'get',
-          url: '/disable/test-job?token=1234'
+          url: '/jobs/disable/test-job?token=1234'
         }, function(response) {
           expect(response.statusCode).to.equal(200);
           expect(response.result).to.deep.equal({ success: true});
@@ -539,7 +539,7 @@ describe('job queue', { timeout: 5000 }, function() {
 
       server.inject({
         method: 'post',
-        url: '/run/test-single?token=1234',
+        url: '/jobs/run/test-single?token=1234',
         payload: [true]
       }, function(response) {
         expect(response.statusCode).to.equal(200);
@@ -552,7 +552,7 @@ describe('job queue', { timeout: 5000 }, function() {
     it('should use auth setting', function(done) {
       server.inject({
         method: 'get',
-        url: '/'
+        url: '/jobs/'
       }, function(response) {
         expect(response.statusCode).to.equal(401);
         done();

@@ -34,7 +34,7 @@ server.method('emailUsers', function(data, done) {
 server.register([
   { register: require('hapi-job-queue'), options: {
     connectionUrl: mongoUrl,
-    endpoint: '/',
+    endpoint: '',
     jobs: [
       {
         name: 'email-users',
@@ -63,7 +63,7 @@ server.register([
 #### Options:
 
  - `connectionUrl` - mongodb connection url
- - `endpoint` - Path for api endpoint. Set to false to disable. (default: false)
+ - `endpoint` - Path for api endpoint. Set to false to disable. No trailing slash. (default: false)
  - `auth` - Auth strategy to use for api endpoints. (default: false)
  - `concurrentTasks` - Number of instances of `method` that can run simultaneously. Note: This is limited on a per job basis. Two jobs running at the same time will each have a max of `concurrentTasks`. (default: 5)
  - `collection` - DB collection to use. (default: Jobs)
