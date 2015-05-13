@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/dawnerd/hapi-job-queue.git"
+    "url": "https://github.com/firstandthird/hapi-job-queue.git"
   },
   "keywords": [
     "hapi",
@@ -18,12 +18,12 @@
     "scheduled",
     "tasks"
   ],
-  "author": "Troy Whiteley",
+  "author": "First+Third",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/dawnerd/hapi-job-queue/issues"
+    "url": "https://github.com/firstandthird/hapi-job-queue/issues"
   },
-  "homepage": "https://github.com/dawnerd/hapi-job-queue",
+  "homepage": "https://github.com/firstandthird/hapi-job-queue",
   "dependencies": {
     "async": "0.9.0",
     "boom": "2.6.1",
