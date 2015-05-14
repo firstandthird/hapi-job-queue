@@ -5,6 +5,7 @@ var Lab = require('lab');
 var lab = exports.lab = Lab.script();
 var Hapi = require('hapi');
 var Joi = require('joi');
+var async = require('async');
 
 var describe = lab.describe;
 var it = lab.it;
@@ -15,17 +16,36 @@ var expect = Code.expect;
 var mongoUrl = 'mongodb://localhost:27017/hapi-job-queue-test';
 
 var server;
+var server2;
 var plugin;
+var plugin2;
 var output = null;
 
 before(function(done) {
   server = new Hapi.Server();
   server.connection({port: 3000});
+  server2 = new Hapi.Server();
+  server2.connection({port: 3001});
   output = null;
   single = false;
+  counter = 0;
 
   server.register(require('hapi-auth-bearer-token'), function (err) {
     server.auth.strategy('simple', 'bearer-access-token', {
+      allowQueryToken: true,
+      accessTokenName: 'token',
+      validateFunc: function( token, callback ) {
+        if(token === "1234"){
+          callback(null, true, { token: token });
+        } else {
+          callback(null, false, { token: token });
+        }
+      }
+    });
+  });
+
+  server2.register(require('hapi-auth-bearer-token'), function (err) {
+    server2.auth.strategy('simple', 'bearer-access-token', {
       allowQueryToken: true,
       accessTokenName: 'token',
       validateFunc: function( token, callback ) {
@@ -57,6 +77,7 @@ before(function(done) {
               schedule: 'every 1 seconds',
               method: function(data, cb) {
                 output = data.time;
+                counter++;
 
                 setTimeout(cb, 100);
               },
@@ -78,7 +99,47 @@ before(function(done) {
         });
 
         plugin = server.plugins.jobs;
-        done();
+
+
+        //second test server
+        server2.register([
+          { register: require('../'), options: {
+            connectionUrl: mongoUrl,
+            endpoint: '/jobs',
+            auth: 'simple',
+            jobs: [
+              {
+                name: 'test-job',
+                enabled: true,
+                schedule: 'every 1 seconds',
+                method: function(data, cb) {
+                  output = data.time;
+                  counter++;
+
+                  setTimeout(cb, 100);
+                },
+                tasks: [
+                  {
+                    time: 1
+                  },
+                  {
+                    time: 2
+                  }
+                ]
+              }
+            ]
+          } }
+        ], function() {
+          server2.method('testMethod', function(data, cb) {
+            output = 'methodized';
+            setTimeout(cb, 50);
+          });
+
+          plugin2 = server2.plugins.jobs;
+
+          done();
+        });
+
       });
 
     });
@@ -295,18 +356,35 @@ describe('job queue', { timeout: 5000 }, function() {
   describe('runner', function() {
     it('should run a job at the specified time', function(done) {
       output = null;
-      plugin.enable('test-job', function(err) {
-        plugin.reschedule('test-job', { schedule: 'every 1 seconds' }, function(err) {
-          expect(err).to.not.exist();
+      counter = 0;
 
-          setTimeout(function() {
-            expect(err).to.not.exist();
-
-            expect(output).to.equal(2);
-            done();
-          }, 1400);
-        });
+      // tests multi server setups.
+      async.parallel([
+        function(next) {
+          plugin.enable('test-job', function(err) {
+            plugin.reschedule('test-job', { schedule: 'every 1 seconds' }, function(err) {
+              expect(err).to.not.exist();
+              next();
+            });
+          });
+        },
+        function(next) {
+          plugin2.enable('test-job', function(err) {
+            plugin2.reschedule('test-job', { schedule: 'every 1 seconds' }, function(err) {
+              expect(err).to.not.exist();
+              next();
+            });
+          });
+        }
+      ], function() {
+        setTimeout(function() {
+          expect(output).to.equal(2);
+          expect(counter).to.equal(2);
+          done();
+        }, 1400);
       });
+
+
     });
 
     it('should lock a running job', function(done) {
