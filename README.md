@@ -67,6 +67,7 @@ server.register([
  - `auth` - Auth strategy to use for api endpoints. (default: false)
  - `concurrentTasks` - Number of instances of `method` that can run simultaneously. Note: This is limited on a per job basis. Two jobs running at the same time will each have a max of `concurrentTasks`. (default: 5)
  - `collection` - DB collection to use. (default: Jobs)
+ - `verbose` - Extra logging. Tagged `hapi-job-queue, info`. (default: true)
  - `jobs` - Array of job objects.
   - `name` - Name of the job. Used in api endpoints and methods.
   - `enabled` - Enables or disables a job.
