@@ -1,6 +1,6 @@
 {
   "name": "hapi-job-queue",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A hapi and mongodb powered job queue",
   "main": "index.js",
   "scripts": {
