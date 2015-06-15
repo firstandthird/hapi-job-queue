@@ -98,6 +98,11 @@ before(function(done) {
           setTimeout(cb, 50);
         });
 
+        server.method('deep.testMethod', function(data, cb) {
+          output = 'methodized';
+          setTimeout(cb, 50);
+        });
+
         plugin = server.plugins.jobs;
 
 
@@ -511,6 +516,28 @@ describe('job queue', { timeout: 5000 }, function() {
         expect(output).to.equal(null);
 
         plugin.runSingle('test-method', function(err, jobError) {
+          expect(err).to.not.exist();
+          expect(jobError).to.not.exist();
+          expect(output).to.equal('methodized');
+          done();
+        });
+      });
+    });
+
+    it('should run a job method by name when nested', function(done) {
+      output = null;
+
+      plugin.add({
+        name: 'deep-test-method',
+        enabled: true,
+        single: true,
+        method: 'deep.testMethod'
+      }, function(err) {
+        expect(err).to.not.exist();
+
+        expect(output).to.equal(null);
+
+        plugin.runSingle('deep-test-method', function(err, jobError) {
           expect(err).to.not.exist();
           expect(jobError).to.not.exist();
           expect(output).to.equal('methodized');
