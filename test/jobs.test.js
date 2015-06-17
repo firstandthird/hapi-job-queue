@@ -458,6 +458,31 @@ describe('job queue', { timeout: 5000 }, function() {
       });
     });
 
+    it('should run a scheduled job right away', function(done) {
+      single = false;
+
+      plugin.add({
+        name: 'test-single3',
+        enabled: true,
+        schedule: 'at 6:00 am',
+        method: function(data, cb) {
+          single = data;
+          cb();
+        }
+      }, function(err) {
+        expect(err).to.not.exist();
+
+        expect(single).to.equal(false);
+
+        plugin.runSingle('test-single3', [true], function(err, jobError) {
+          expect(err).to.not.exist();
+          expect(jobError).to.not.exist();
+          expect(single).to.equal(true);
+          done();
+        });
+      });
+    });
+
     it('should handle a failed job', function(done) {
       plugin.add({
         name: 'test-fail',
