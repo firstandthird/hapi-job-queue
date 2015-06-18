@@ -532,7 +532,7 @@ describe('job queue', { timeout: 5000 }, function() {
       var single = false;
 
       plugin.add({
-        name: 'test-single2',
+        name: 'test-single4',
         enabled: true,
         single: true,
         method: function(data, cb) {
@@ -544,7 +544,7 @@ describe('job queue', { timeout: 5000 }, function() {
 
         expect(single).to.equal(false);
 
-        plugin.runSingle('test-single2', {}, function(err, jobError) {
+        plugin.runSingle('test-single4', {}, function(err, jobError) {
           expect(err).to.not.exist();
           expect(jobError).to.not.exist();
           expect(single).to.equal(true);
