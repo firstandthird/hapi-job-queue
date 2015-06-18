@@ -28,7 +28,7 @@ before(function(done) {
   server2.connection({port: 3001});
   output = null;
   single = false;
-  counter = 0;
+  var counter = 0;
 
   server.register(require('hapi-auth-bearer-token'), function (err) {
     server.auth.strategy('simple', 'bearer-access-token', {
@@ -519,6 +519,31 @@ describe('job queue', { timeout: 5000 }, function() {
         expect(single).to.equal(false);
 
         plugin.runSingle('test-single2', function(err, jobError) {
+          expect(err).to.not.exist();
+          expect(jobError).to.not.exist();
+          expect(single).to.equal(true);
+          done();
+        });
+      });
+    });
+
+    it('should run a job with empty data', function(done) {
+      var single = false;
+
+      plugin.add({
+        name: 'test-single2',
+        enabled: true,
+        single: true,
+        method: function(data, cb) {
+          single = true;
+          cb();
+        }
+      }, function(err) {
+        expect(err).to.not.exist();
+
+        expect(single).to.equal(false);
+
+        plugin.runSingle('test-single2', {}, function(err, jobError) {
           expect(err).to.not.exist();
           expect(jobError).to.not.exist();
           expect(single).to.equal(true);
