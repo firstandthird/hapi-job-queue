@@ -20,6 +20,7 @@ var server2;
 var plugin;
 var plugin2;
 var output = null;
+var counter = 0;
 
 before(function(done) {
   server = new Hapi.Server();
@@ -28,7 +29,7 @@ before(function(done) {
   server2.connection({port: 3001});
   output = null;
   single = false;
-  var counter = 0;
+  counter = 0;
 
   server.register(require('hapi-auth-bearer-token'), function (err) {
     server.auth.strategy('simple', 'bearer-access-token', {
