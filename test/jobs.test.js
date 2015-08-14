@@ -20,6 +20,7 @@ var server2;
 var plugin;
 var plugin2;
 var output = null;
+var counter = 0;
 
 before(function(done) {
   server = new Hapi.Server();
@@ -519,6 +520,31 @@ describe('job queue', { timeout: 5000 }, function() {
         expect(single).to.equal(false);
 
         plugin.runSingle('test-single2', function(err, jobError) {
+          expect(err).to.not.exist();
+          expect(jobError).to.not.exist();
+          expect(single).to.equal(true);
+          done();
+        });
+      });
+    });
+
+    it('should run a job with empty data', function(done) {
+      var single = false;
+
+      plugin.add({
+        name: 'test-single4',
+        enabled: true,
+        single: true,
+        method: function(data, cb) {
+          single = true;
+          cb();
+        }
+      }, function(err) {
+        expect(err).to.not.exist();
+
+        expect(single).to.equal(false);
+
+        plugin.runSingle('test-single4', {}, function(err, jobError) {
           expect(err).to.not.exist();
           expect(jobError).to.not.exist();
           expect(single).to.equal(true);
