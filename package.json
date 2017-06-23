@@ -30,7 +30,7 @@
     "hoek": "2.12.0",
     "later": "1.1.6",
     "lodash": "3.8.0",
-    "mongodb": "2.0.25"
+    "mongodb": "^2.2.29"
   },
   "devDependencies": {
     "code": "1.4.0",
