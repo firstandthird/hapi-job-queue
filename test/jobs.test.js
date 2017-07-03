@@ -254,7 +254,7 @@ describe('job queue', { timeout: 5000 }, function() {
           cb();
         }
       }, function(err) {
-        expect(err).to.deep.equal(new Error('Job already loaded'));
+        expect(err).to.not.be.null();
 
         plugin.collection.find({name: 'test-job'}).toArray(function(err, jobs) {
           expect(jobs.length).to.equal(1);
